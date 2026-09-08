@@ -1,7 +1,9 @@
 # pracht_module — leere Frappe-App als Modul-Container
 
-> **Rumpf, noch nicht in Betrieb.** Kein Git-Repo, kein Remote, nicht gebaut,
-> nicht installiert. Angelegt am 2026-09-08 nach Entscheidung **K23**.
+> **Gebaut, noch nicht installiert.** Angelegt am 2026-09-08 (K23), Remote
+> `github.com/andreas-pracht/pracht_module` (**öffentlich**, K34/Weg B),
+> Tag `v0.0.1`, seit dem 2026-09-08 im Custom Image enthalten.
+> **Die Installation auf der Site steht aus** — eigenes Gate (K22).
 > Verfahren: [`../../_briefing/erpnext-hr/07-modul-app-installation.md`](../../_briefing/erpnext-hr/07-modul-app-installation.md)
 
 ## Wozu
@@ -15,6 +17,24 @@ und Cmd+K — und eine Migration kann sie löschen. **Am 2026-07-29 ist genau da
 passiert**: Die Migration auf 16.30.0 löschte den Workspace `Vermietung`
 (`Deleting entity Workspace Vermietung`); er musste aus der Fixture
 wiederhergestellt werden.
+
+## 🔴 Bedingung für die öffentliche Sichtbarkeit
+
+Dieses Repo ist **öffentlich**, damit der Build-Host es ohne Token klonen kann
+(Entscheidung des Inhabers vom 2026-09-08, Weg B). Daran hängt eine Bedingung:
+
+> **Die App bleibt ein reiner Modul-Container. Sobald Fixtures, Print Formats
+> oder Firmenlogik hineinsollen, geht sie zurück auf privat**, und der Zugang
+> läuft über einen Fine-grained PAT (Repository access: nur dieses Repo,
+> Contents: Read-only), eingetragen in der `apps.json` **auf dem Host**.
+
+**Wer hier Inhalt ergänzen will, prüft zuerst: Ist das etwas, das öffentlich
+stehen darf?** Wenn nein, erst die Sichtbarkeit ändern, dann committen — nicht
+umgekehrt. Ein Commit ist öffentlich, sobald er gepusht ist; ihn danach privat
+zu stellen holt ihn nicht zurück.
+
+Verfahren für den privaten Fall:
+`platform/erpnext/_briefing/erpnext-hr/02-custom-image.md`, § 3.
 
 ## Was hier *nicht* hineingehört
 
@@ -52,11 +72,11 @@ Bei `Vermietung` und `Fuhrpark` fallen beide zusammen.
 
 ## Was noch einzusetzen ist
 
-| # | Stelle | offen |
+| # | Stelle | Stand |
 | --- | --- | --- |
-| 1 | **Remote-URL** | Andreas legt Repo und URL fest (K23). Einzutragen in `deploy/erpnext-image/apps.json` |
-| 2 | **App-Name** | `pracht_module` ist ein **Vorschlag**. Wird er geändert, siehe unten |
-| 3 | **`git init`** | hier noch nicht ausgeführt |
+| 1 | **Remote-URL** | ✅ `https://github.com/andreas-pracht/pracht_module`, in `deploy/erpnext-image/apps.json` mit Tag `v0.0.1` |
+| 2 | **App-Name** | ✅ `pracht_module` bestätigt (K31). Geprüft: `bench` leitet den Namen aus `pyproject.toml` ab, nicht aus der URL — beide stimmen überein, kein Rename |
+| 3 | **Installation auf der Site** | ⏳ eigenes Gate nach A2 — [`07-modul-app-installation.md`](../../_briefing/erpnext-hr/07-modul-app-installation.md) |
 
 ### Wenn der Name geändert wird
 
@@ -76,17 +96,20 @@ Unterstriche, keine Bindestriche.
 
 ## Verhältnis Repo ↔ Workspace-Spiegel
 
-Nach K23 liegt der Quellcode **doppelt**: im eigenen privaten Repo (das
-`apps.json` referenziert) und hier als Spiegel.
+Nach K23 liegt der Quellcode **doppelt**: im Repo (das `apps.json`
+referenziert) und hier als Spiegel.
 
-⚠️ **Zwei Kopien können auseinanderlaufen.** Der Build zieht **das Repo**, nicht
-diesen Ordner — wer nur hier ändert, ändert am gebauten Image nichts.
-Empfehlung: Diesen Ordner **selbst** zum Arbeitsverzeichnis mit dem Remote
-machen (`git init` + `git remote add`), statt zwei getrennte Kopien zu pflegen.
-Dann ist der Spiegel kein Spiegel, sondern das Original.
+🔴 **Diese Doppelung ist jetzt scharf.** Der Build zieht **das Repo am Tag
+`v0.0.1`**, nicht diesen Ordner. Wer nur hier ändert, ändert am gebauten Image
+nichts — und merkt es erst, wenn die Installation etwas anderes tut als
+erwartet.
 
-Das berührt ADR-0003 (Websites = eigenes Repo) nur der Form nach: Wie bei den
-drei Website-Repos läge auch hier ein eigenes Repo physisch im Workspace und
-wäre in dessen `.gitignore` auszuschließen. **Ob so verfahren wird, ist deine
-Entscheidung** — solange kein Remote existiert, ist die Frage nicht dringend,
-aber sie gehört vor dem ersten Build beantwortet.
+**Bei jeder Änderung deshalb beides:** hier ändern, ins Repo pushen, **neuen
+Tag setzen** und den Tag in `deploy/erpnext-image/apps.json` nachziehen. Ein
+Build gegen `v0.0.1` bleibt sonst auf dem alten Stand, egal was hier steht.
+
+**Empfehlung, um die Doppelung ganz loszuwerden:** Diesen Ordner selbst zum
+Arbeitsverzeichnis mit dem Remote machen (`git init` + `git remote add`), dann
+ist er kein Spiegel, sondern das Original. Das wäre dieselbe Bauart wie die
+drei Website-Repos (ADR-0003) und bräuchte einen Eintrag im Workspace-
+`.gitignore`. **Noch nicht umgesetzt** — deine Entscheidung.
